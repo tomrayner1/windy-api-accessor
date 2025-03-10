@@ -1,3 +1,6 @@
 .venv/
+weather_data/
+
 **/__pycache__/
+
 keys.txt

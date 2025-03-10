@@ -35,7 +35,7 @@ def main():
           "lon": y,
           "model": "gfs",
           "parameters": ["temp"],
-          "key": "vlYBN5kOdiiPN7lbHjDT1pkSri6LT5SB",
+          "key": "",
         }
 
         response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)

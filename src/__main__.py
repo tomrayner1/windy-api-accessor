@@ -26,7 +26,7 @@ def main():
 
   # Load coordinates from coordinates.txt
   coords = load_coordinates()
-  print(f"Loaded {len(coords)} api keys.")
+  print(f"Loaded {len(coords)} coordinates.")
 
   # Format name for file
   filename = f"weather_data/{datetime.datetime.today().strftime("%d_%B_%H%M")}.json"

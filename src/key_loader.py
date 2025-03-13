@@ -5,6 +5,4 @@ def load_keys():
     for line in keyfile:
       keys.append(line.replace('\n', ''))
   
-  print(f"Loaded {len(keys)} api keys.")
-
   return keys

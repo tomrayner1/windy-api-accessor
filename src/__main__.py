@@ -1,19 +1,22 @@
 import requests
+import datetime
 import time
 from src.key_loader import *
 from src.file_handler import *
+from src.coordinates import *
 
-#TOP_LEFT = (5.49, 100.17)
-#BOTTOM_RIGHT = (5.26, 100.34)
 
 def main():
   print("-"*80 + "\nWindy API Accessor\n" + "-"*80)
 
   # Start timing 
   start = time.perf_counter()
+
   # Load all API keys from keys.txt
   keys = load_keys()
+  print(f"Loaded {len(keys)} api keys.")
 
+  # Create weather_data folder
   create_folder()
 
   # Error if we got no keys.
@@ -21,41 +24,71 @@ def main():
     print("Could not load any windy api keys from keys.txt.")
     return
 
-  i = 0
+  # Load coordinates from coordinates.txt
+  coords = load_coordinates()
+  print(f"Loaded {len(coords)} api keys.")
 
-  with open('weather_data/test.json', 'a') as file:
+  # Format name for file
+  filename = f"weather_data/{datetime.datetime.today().strftime("%d_%B_%H%M")}.json"
+
+  # Open data file
+  with open(filename, 'a') as file:
+    # Write json
     file.write('{\n')
-    for xLoop in range(49, 26-1, -1):
-      for yLoop in range(17, 34+1):
-        x = 5 + (xLoop / 100)
-        y = 100 + (yLoop / 100)
 
+    # Loop through each coordinate
+    for coord in coords:
+      # Get the lat & long
+      x = coord[0] # Latitude
+      y = coord[1] # Longitude
+
+      # Construct request body
+      data = {
+        "lat": x,
+        "lon": y,
+        "model": "gfs",
+        "parameters": ["temp", "ptype", "precip", "wind", "windGust", "lclouds", "mclouds", "hclouds"],
+        "key": keys[0],
+      }
+
+      # Send request
+      response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)
+      # Request code
+      print(f"windy says {response.status_code}.")
+
+      # Good response, write data to file
+      if response.status_code == 200:
+        file.write(f'  "{x}, {y}": {response.text},')
+      # API key could've reached limit
+      else:
+        print(f"ERROR: {response.text}")
+        # Delete the current key and retry with the next one
+        del keys[0]
+        print(f"Retrying...")
+
+        # Construct request body
         data = {
           "lat": x,
           "lon": y,
           "model": "gfs",
-          "parameters": ["temp"],
-          "key": "",
-        }
+          "parameters": ["temp", "ptype", "precip", "wind", "windGust", "lclouds", "mclouds", "hclouds"],
+          "key": keys[0],
+       }
 
+        # Send request
         response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)
-
+        # Request code
         print(f"windy says {response.status_code}.")
 
+        # Good response, write data to file
         if response.status_code == 200:
           file.write(f'  "{x}, {y}": {response.text},')
+        # Not an API key issue, something has actually gone wrong
         else:
-          print(f"ERROR: {response.text}")
-        i += 1
+          print(f"Retry failed.\nREASON: {response.text}")
 
     file.write('}\n')
   
-  print(f"{i} positions checked.")
-
-  
-
-  
-
   # Time how long we took
   end = time.perf_counter()
   print(f"Finished in {end - start}s.")

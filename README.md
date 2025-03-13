@@ -19,8 +19,14 @@
 
 ### Data stored
 
-Starting from the top-left of Penang island at (5.49, 100.17) and going down to the bottom right at (5.26, 100.34).
-
-Checks 432 possible positions. 
-
 Parameters: Date, Temp, ptype, precip, wind, windGust, lclouds, mclouds, hclouds
+
+### Data cleaning
+
+1. Remove last comma in the data file.
+2. `Cmd+Shift+P` or open the command palette.
+3. `Beautify JSON`
+4. `Cmd+F` and replace every instance of the following string with nothing.
+
+,
+    "warning": "The trial API version is for development purposes only. This data is randomly shuffled and slightly modified."

@@ -1,9 +1,9 @@
 def load_coordinates():
-    coords = []
+  coords = []
 
-    with open("coordinates.txt", 'r') as file:
-        for line in file:
-            oneline = line.replace('\n', '')
-            coords.append(oneline.split(', '))
+  with open("coordinates.txt", 'r') as file:
+    for line in file:
+      oneline = line.replace('\n', '')
+      coords.append(oneline.split(', '))
 
-    return coords
+  return coords

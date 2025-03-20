@@ -1,6 +1,7 @@
 import requests
 import datetime
 import time
+import json
 from src.key_loader import *
 from src.file_handler import *
 from src.coordinates import *
@@ -31,6 +32,11 @@ def main():
   # Format name for file
   filename = f"weather_data/{datetime.datetime.today().strftime("%d_%B_%H%M")}.json"
 
+  attempts = 0
+  errors = 0
+
+  print(f"Working...")
+
   # Open data file
   with open(filename, 'a') as file:
     # Write json
@@ -38,6 +44,8 @@ def main():
 
     # Loop through each coordinate
     for coord in coords:
+      attempts += 1
+
       # Get the lat & long
       x = coord[0] # Latitude
       y = coord[1] # Longitude
@@ -54,7 +62,7 @@ def main():
       # Send request
       response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)
       # Request code
-      print(f"windy says {response.status_code}.")
+      # print(f"windy says {response.status_code}.")
 
       # Good response, write data to file
       if response.status_code == 200:
@@ -62,6 +70,9 @@ def main():
       # API key could've reached limit
       else:
         print(f"ERROR: {response.text}")
+
+        attempts += 1
+
         # Delete the current key and retry with the next one
         del keys[0]
         print(f"Retrying...")
@@ -78,7 +89,7 @@ def main():
         # Send request
         response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)
         # Request code
-        print(f"windy says {response.status_code}.")
+        print(f"retry: {response.status_code}.")
 
         # Good response, write data to file
         if response.status_code == 200:
@@ -87,8 +98,35 @@ def main():
         else:
           print(f"Retry failed.\nREASON: {response.text}")
 
+          errors += 1
+
     file.write('}\n')
+
+  print(f"API calls: {attempts}, Errors: {errors}")
+
+  # Formatting JSON
+  rawdata = ""
+
+  # Read file data to string
+  with open(filename, 'r') as file:
+    rawdata = file.read().rstrip('\n')
   
+  # Make parsable JSON
+  rawdata = rawdata[:-2]
+  rawdata += "}"
+  # Remove warning
+  rawdata = rawdata.replace(',"warning":"The trial API version is for development purposes only. This data is randomly shuffled and slightly modified."', '')
+
+  # Convert string to JSON
+  jsondata = json.loads(rawdata)
+
+  # Dump JSON to file
+  with open(filename, 'w+') as file:
+    file.truncate(0)
+    file.write(json.dumps(jsondata, indent=2))
+  
+  print(f"Wrote data to {filename}")
+
   # Time how long we took
   end = time.perf_counter()
   print(f"Finished in {end - start}s.")

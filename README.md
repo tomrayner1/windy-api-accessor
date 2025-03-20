@@ -23,10 +23,4 @@ Parameters: Date, Temp, ptype, precip, wind, windGust, lclouds, mclouds, hclouds
 
 ### Data cleaning
 
-1. Remove last comma in the data file.
-2. `Cmd+Shift+P` or open the command palette.
-3. `Beautify JSON`
-4. `Cmd+F` and replace every instance of the following string with nothing.
-
-,
-    "warning": "The trial API version is for development purposes only. This data is randomly shuffled and slightly modified."
+Data cleaning is now done automatically.

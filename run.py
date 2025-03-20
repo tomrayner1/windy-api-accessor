@@ -1,13 +1,10 @@
 from src import __main__
 import time
 
-# Run the code every 6 hours
+# Run the code every 4 hours
 
 if __name__ == "__main__":
+  while True:
     __main__.main()
-    # 60 seconds
-    # *
-    # 60 minutes
-    # *
-    # 6 hours
-    time.sleep(60 * 60 * 6)
+    
+    time.sleep(60 * 60 * 4)

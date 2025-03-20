@@ -52,11 +52,12 @@ def main():
 
       # Construct request body
       data = {
-        "lat": x,
-        "lon": y,
+        "lat": f"{x}",
+        "lon": f"{y}",
         "model": "gfs",
         "parameters": ["temp", "ptype", "precip", "wind", "windGust", "lclouds", "mclouds", "hclouds"],
-        "key": keys[0],
+        "levels": ["surface"],
+        "key": f"{keys[0]}"
       }
 
       # Send request
@@ -79,12 +80,13 @@ def main():
 
         # Construct request body
         data = {
-          "lat": x,
-          "lon": y,
+          "lat": f"{x}",
+          "lon": f"{y}",
           "model": "gfs",
           "parameters": ["temp", "ptype", "precip", "wind", "windGust", "lclouds", "mclouds", "hclouds"],
-          "key": keys[0],
-       }
+          "levels": ["surface"],
+          "key": f"{keys[0]}"
+        }
 
         # Send request
         response = requests.post("https://api.windy.com/api/point-forecast/v2", json=data)
@@ -115,7 +117,7 @@ def main():
   rawdata = rawdata[:-2]
   rawdata += "}"
   # Remove warning
-  rawdata = rawdata.replace(',"warning":"The trial API version is for development purposes only. This data is randomly shuffled and slightly modified."', '')
+  rawdata = rawdata.replace(',"warning":"The testing API version is for development purposes only. This data is randomly shuffled and slightly modified."', '')
 
   # Convert string to JSON
   jsondata = json.loads(rawdata)

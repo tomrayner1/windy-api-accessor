@@ -1,5 +1,6 @@
 from tests.file_test import *
 from tests.sql_test import *
+from tests.request_fix import *
 
 
 TEST_CASE = 2
@@ -15,6 +16,9 @@ def test_main():
       return
     case 2:
       sql_test()
+      return
+    case 3:
+      request_fix()
       return
 
 

@@ -7,3 +7,5 @@ weather_data/
 
 keys.txt
 database_creds.txt
+
+.env

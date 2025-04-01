@@ -71,6 +71,9 @@ def insert_data():
                 db_session.rollback()
                 print(f"Error inserting data: {e}")
 
+        db_session.close()
+        print("Finished inserting data. Closing session.")
+
     return
 
 

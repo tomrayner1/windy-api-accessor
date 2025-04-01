@@ -3,7 +3,9 @@ from .database import Base  # Import Base from database.py
 
 
 class TemperatureData(Base):
-    __tablename__ = "Temperature_Data_Test"
+    __tablename__ = (
+        "Temperature_Data_Test"  # Change to "Temperature_Data" for production
+    )
 
     Temperature_ID = Column(Integer, primary_key=True, autoincrement=True)
     Source_Name = Column(String(50), nullable=False)

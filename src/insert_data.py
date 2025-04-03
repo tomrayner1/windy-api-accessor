@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import os
 from database.database import get_session
 from database.models import TemperatureData
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -17,21 +18,23 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 ('Avg_Temp',)
 """
 
-EXECUTE_SQL = True
 TEST_FILE = "weather_data/13_March_1008.json"
 
 
-def insert_data():
+def insert_data(file_name: str):
+    
+    file = f"weather_data/{file_name}"
 
     db_session = get_session()
 
-    with open(TEST_FILE, "r") as datafile:
+    with open(file, "r") as datafile:
         data = json.load(datafile)
 
     for key, _ in data.items():
         coords = key.split(", ")
         lat = float(coords[0])
         long = float(coords[1])
+        
 
         print(f"\n{lat}, {long}\n" + "-" * 95)
 
@@ -47,6 +50,8 @@ def insert_data():
 
             min_temp = min(min_temp, temp)
             max_temp = max(max_temp, temp)
+            avg_temp = (min_temp + max_temp) / 2
+
 
             try:
                 new_record = TemperatureData(
@@ -56,7 +61,7 @@ def insert_data():
                     Longitude=long,
                     Min_Temp=min_temp,
                     Max_Temp=max_temp,
-                    Avg_Temp=temp,
+                    Avg_Temp=avg_temp,
                 )
                 db_session.add(new_record)
                 db_session.commit()
@@ -76,5 +81,16 @@ def insert_data():
 
     return
 
+# get files in weather data
 
-insert_data()
+files = os.listdir("weather_data")
+
+files.remove("old_data")
+files.remove(".git")
+files.remove("README.md")
+
+print(files)
+
+for file in files:
+    insert_data(file_name=file)
+

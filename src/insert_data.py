@@ -6,35 +6,21 @@ from database.models import TemperatureData
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 
-# Temperature_Data & Temperature_Data_Test columns
-"""
-('Temperature_ID',)
-('Source_Name',)
-('Date',)
-('Latitude',)
-('Longitude',)
-('Min_Temp',)
-('Max_Temp',)
-('Avg_Temp',)
-"""
-
-TEST_FILE = "weather_data/13_March_1008.json"
+db_session = get_session()
 
 
 def insert_data(file_name: str):
-    
-    file = f"weather_data/{file_name}"
 
-    db_session = get_session()
+    file = f"weather_data/{file_name}"
 
     with open(file, "r") as datafile:
         data = json.load(datafile)
 
     for key, _ in data.items():
+
         coords = key.split(", ")
         lat = float(coords[0])
         long = float(coords[1])
-        
 
         print(f"\n{lat}, {long}\n" + "-" * 95)
 
@@ -52,7 +38,6 @@ def insert_data(file_name: str):
             max_temp = max(max_temp, temp)
             avg_temp = (min_temp + max_temp) / 2
 
-
             try:
                 new_record = TemperatureData(
                     Source_Name="Windy",
@@ -65,6 +50,7 @@ def insert_data(file_name: str):
                 )
                 db_session.add(new_record)
                 db_session.commit()
+
             except IntegrityError as e:
                 db_session.rollback()
                 print(f"Duplicated data... skipping")
@@ -76,21 +62,32 @@ def insert_data(file_name: str):
                 db_session.rollback()
                 print(f"Error inserting data: {e}")
 
-        db_session.close()
-        print("Finished inserting data. Closing session.")
+            print("Finished inserting data.")
+
+    with open("./src/files_done.txt", "a") as files_done:
+        files_done.write(file_name + "\n")
 
     return
 
-# get files in weather data
+
+with open("./src/files_done.txt", "r+") as files_done:
+    files_done = files_done.read().splitlines()
 
 files = os.listdir("weather_data")
+
 
 files.remove("old_data")
 files.remove(".git")
 files.remove("README.md")
 
-print(files)
-
 for file in files:
-    insert_data(file_name=file)
+    if file in files_done:
+        print(f"File {file} already processed.")
+        continue
+    else:
+        print(f"File {file} not processed yet.")
+        insert_data(file_name=file)
 
+
+db_session.close()
+print("Database Session closed.")

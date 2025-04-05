@@ -5,24 +5,27 @@ import json
 from src.key_loader import *
 from src.file_handler import *
 from src.coordinates import *
+from src.database.database import get_session
+from src.database.models import TemperatureData
+from src.new_insert2 import group_by_day
 
 
 def main():
-  print("-"*80 + "\nWindy API Accessor\n" + "-"*80)
+  print(f"Running now (at {datetime.datetime.today().strftime("%d_%B_%H%M")})")
 
   # Start timing 
   start = time.perf_counter()
 
   # Load all API keys from keys.txt
   keys = load_keys()
-  print(f"Loaded {len(keys)} api keys.")
+  print(f"Loaded {len(keys)} api keys")
 
   # Create weather_data folder
   create_folder()
 
   # Error if we got no keys.
   if keys == 0:
-    print("Could not load any windy api keys from keys.txt.")
+    print("Could not load any windy api keys from keys.txt")
     return
 
   # Load coordinates from coordinates.txt
@@ -35,7 +38,7 @@ def main():
   attempts = 0
   errors = 0
 
-  print(f"Working...")
+  print(f"Requesting data from API endpoint")
 
   # Open data file
   with open(filename, 'a') as file:
@@ -129,9 +132,74 @@ def main():
   
   print(f"Wrote data to {filename}")
 
+  # Re-open the file we just saved, attempt to save it to the database,
+  # if it fails we still have the backup file.
+  try:
+    print("Attempting to insert/update ~5000 database entries, this will take a while")
+    db_session = get_session()
+
+    with open(filename, 'r') as file:
+      data = json.load(file)
+    
+    for key in data:
+      coords = key.split(", ")
+      lat = float(coords[0])
+      long = float(coords[1])
+
+      times = {}
+
+      for ts, kelvin in zip(data[key]["ts"], data[key]["temp-surface"]):
+        seconds_epoch = int(ts / 1000)
+        celsius = kelvin - 273.15
+        times[seconds_epoch] = celsius
+
+        daily_groups = group_by_day(times)
+
+        for date in sorted(daily_groups):
+          day_temps = daily_groups[date]
+          min_temp = min(day_temps)
+          max_temp = max(day_temps)
+          avg_temp = sum(day_temps) / len(day_temps)
+
+          existing = db_session.query(TemperatureData).filter_by(
+            Source_Name="Windy",
+            Date=date,
+            Latitude=lat,
+            Longitude=long
+          ).first()
+
+          if existing:
+            continue
+
+          try:
+            new_record = TemperatureData(
+              Source_Name="Windy",
+              Date=date,
+              Latitude=lat,
+              Longitude=long,
+              Min_Temp=min_temp,
+              Max_Temp=max_temp,
+              Avg_Temp=avg_temp,
+            )
+            db_session.add(new_record)
+          except Exception:
+            db_session.rollback()
+  # Catch any errors during SQL
+  except Exception as e:
+    print(f"Failed to update database.\n{e}")
+  # Try to commit and close any changes that were made before errors
+  finally:
+    try:
+      db_session.commit()
+      db_session.close()
+
+      print(f"Updated database with new data, {filename} can be deleted.")
+    except Exception as _:
+      print()
+
   # Time how long we took
   end = time.perf_counter()
-  print(f"Finished in {end - start}s.")
+  print(f"Finished in {(end - start):.2f}s.\n")
 
   return
 

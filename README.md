@@ -1,6 +1,6 @@
 # Windy API Accessor
 
-The main branch may not work, use a release branch such as `1.0` instead for production code.
+The master branch may not always work, use a release branch such as `1.0` instead for production code.
 
 Always make sure to check if you are using the testing or production table, this can be found in `src/database/models.py`.
 

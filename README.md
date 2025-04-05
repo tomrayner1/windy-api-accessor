@@ -1,6 +1,6 @@
 # Windy API Accessor
 
-The main branch may not work, use a release branch instead for production code.
+The main branch may not always work, use a release branch such as `1.0` instead for production code.
 
 Always make sure to check if you are using the testing or production table, this can be found in `src/database/models.py`.
 
@@ -9,7 +9,7 @@ Always make sure to check if you are using the testing or production table, this
 1. `py -m venv .venv`.
 2. `.venv\Scripts\activate`.
 3. `pip install -r requirements.txt`.
-4. Create a `keys.txt` file in the repository root and add windy api keys to it.
+4. Create a `keys.txt` file in the repository root using the `keys.txt.example` and add Windy API keys to it.
 5. Create a `.env` file in the repository root using the `.env.example` template and add MySQL database details.
 
 ### Building (Unix based)
@@ -18,7 +18,7 @@ Always make sure to check if you are using the testing or production table, this
 2. `chmod +x .venv/bin/activate`.
 3. `.venv/bin/activate`.
 4. `pip install -r requirements.txt`.
-5. Create a `keys.txt` file in the repository root and add windy api keys to it.
+5. Create a `keys.txt` file in the repository root using the `keys.txt.example` and add Windy API keys to it.
 6. Create a `.env` file in the repository root using the `.env.example` template and add MySQL database details.
 
 ### Running

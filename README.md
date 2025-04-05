@@ -2,7 +2,7 @@
 
 The main branch may not work, use a release branch instead for production code.
 
-Always make sure to check if you are using the testing or production table, this can be found in `src/database/models.py`
+Always make sure to check if you are using the testing or production table, this can be found in `src/database/models.py`.
 
 ### Building (Windows)
 

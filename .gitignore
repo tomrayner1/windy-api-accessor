@@ -6,6 +6,5 @@ weather_data/
 **/__pycache__/
 
 keys.txt
-database_creds.txt
 
 .env

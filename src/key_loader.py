@@ -1,4 +1,7 @@
 def load_keys():
+  """
+  Loads the API keys from keys.txt in the project's root.
+  """
   keys = []
 
   with open("keys.txt") as keyfile:

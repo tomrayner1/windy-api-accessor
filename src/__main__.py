@@ -136,11 +136,14 @@ def main():
   # if it fails we still have the backup file.
   try:
     print("Attempting to insert/update ~5000 database entries, this will take a while")
+    # Load database
     db_session = get_session()
 
+    # Load JSON into memory
     with open(filename, 'r') as file:
       data = json.load(file)
     
+    # Loop through every coordinate in the JSON
     for key in data:
       coords = key.split(", ")
       lat = float(coords[0])
@@ -148,19 +151,25 @@ def main():
 
       times = {}
 
+      # Loop through each timestamp and group it with its' temperature
       for ts, kelvin in zip(data[key]["ts"], data[key]["temp-surface"]):
+        # Convertions
         seconds_epoch = int(ts / 1000)
         celsius = kelvin - 273.15
         times[seconds_epoch] = celsius
 
+        # Group timestamps and temperatures by new days in Malaysia
         daily_groups = group_by_day(times)
 
+        # Loop through each day
         for date in sorted(daily_groups):
           day_temps = daily_groups[date]
+          # Calculate stats
           min_temp = min(day_temps)
           max_temp = max(day_temps)
           avg_temp = sum(day_temps) / len(day_temps)
 
+          # Query if data already exists in the database
           existing = db_session.query(TemperatureData).filter_by(
             Source_Name="Windy",
             Date=date,
@@ -168,9 +177,11 @@ def main():
             Longitude=long
           ).first()
 
+          # If the data exists, skip
           if existing:
             continue
 
+          # Create new record for the day
           try:
             new_record = TemperatureData(
               Source_Name="Windy",
@@ -194,8 +205,8 @@ def main():
     try:
       db_session.commit()
       db_session.close()
-    except Exception as _:
-      print()
+    except Exception:
+      pass
 
   # Time how long we took
   end = time.perf_counter()

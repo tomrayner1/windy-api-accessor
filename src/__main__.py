@@ -11,7 +11,7 @@ from src.new_insert2 import group_by_day
 
 
 def main():
-  print(f"Running now (at {datetime.datetime.today().strftime("%d_%B_%H%M")})")
+  print(f"Running now (at {datetime.datetime.today().strftime("%d %B %H:%M")})")
 
   # Start timing 
   start = time.perf_counter()
@@ -184,6 +184,8 @@ def main():
             db_session.add(new_record)
           except Exception:
             db_session.rollback()
+    
+    print(f"Updated database with new data, {filename} can be deleted.")
   # Catch any errors during SQL
   except Exception as e:
     print(f"Failed to update database.\n{e}")
@@ -192,8 +194,6 @@ def main():
     try:
       db_session.commit()
       db_session.close()
-
-      print(f"Updated database with new data, {filename} can be deleted.")
     except Exception as _:
       print()
 
